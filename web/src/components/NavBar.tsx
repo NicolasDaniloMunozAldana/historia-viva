@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import ServiceWorkerRegister from "./ServiceWorkerRegister";
 
 const ENLACES = [
   { href: "/", etiqueta: "Inicio" },
@@ -29,6 +30,7 @@ export default function NavBar() {
           </Link>
         ))}
       </nav>
+      <ServiceWorkerRegister />
     </header>
   );
 }
