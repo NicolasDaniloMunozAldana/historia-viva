@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Mulish } from "next/font/google";
 import "./globals.css";
 import NavBar from "@/components/NavBar";
@@ -13,6 +13,11 @@ export const metadata: Metadata = {
   title: "HistoriaViva — Registro clínico offline-first",
   description:
     "Aplicación para que el personal de salud registre signos vitales y dosis sin depender de la conexión a Internet.",
+  manifest: "/manifest.webmanifest",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#402F6C",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
