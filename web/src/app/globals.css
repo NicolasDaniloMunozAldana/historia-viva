@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+/* Paleta y tokens tomados del design system de Alivia. */
+@theme {
+  --color-purple-1: #402f6c;
+  --color-purple-2: #6a4cb3;
+  --color-purple-3: #65558f;
+  --color-purple-4: #d2c7ed;
+  --color-purple-5: #e1dbf0;
+  --color-purple-6: #ece6f0;
+  --color-lilac-1: #f2edf5;
+  --color-lilac-2: #fdfaff;
+  --color-green-1: #68eeb4;
+  --color-green-2: #c3f4df;
+  --color-neutral-1: #f5f5f5;
+  --color-neutral-2: #e7ebee;
+  --color-neutral-3: #ffffff;
+  --color-black-1: #000000;
+  --color-black-2: #3a3a3c;
+  --color-black-3: #8e8e93;
+  --color-black-4: #aeaeb2;
+  --color-black-6: #d1d1d6;
+  --color-status-red: #bf4c48;
+  --color-status-green: #60b96a;
+  --radius-card: 20px;
+  --radius-button: 40px;
+  --shadow-card: 0px 4px 10.5px 0px rgba(0, 0, 0, 0.14);
+  --shadow-navbar: 0px 4px 13.3px 0px rgba(0, 0, 0, 0.1);
+  --font-mulish: var(--font-mulish);
+}
+
+body {
+  background: var(--color-neutral-1);
+  color: var(--color-black-2);
+  font-family: var(--font-mulish), system-ui, sans-serif;
+}
+
+@layer components {
+  .btn-primary {
+    @apply rounded-[40px] border border-purple-1 bg-green-1 px-6 py-3 font-bold text-purple-1 transition-transform hover:scale-105;
+  }
+
+  .btn-secondary {
+    @apply rounded-[40px] border border-purple-1 bg-white px-6 py-3 font-bold text-purple-1 transition-transform hover:scale-105;
+  }
+
+  .card {
+    @apply rounded-[20px] bg-white p-5 shadow-[0px_4px_10.5px_0px_rgba(0,0,0,0.14)];
+  }
+
+  .input-field {
+    @apply w-full rounded-2xl border border-black-4 bg-neutral-1 px-4 py-3 text-sm text-black-2 outline-none focus:border-purple-2 focus:ring-4 focus:ring-purple-5;
+  }
+
+  .nav-bar {
+    @apply sticky top-4 z-10 mx-auto flex w-[min(720px,calc(100%-2rem))] items-center justify-between gap-3 rounded-full bg-white/75 px-5 py-3 shadow-[0px_4px_13.3px_0px_rgba(0,0,0,0.1)] backdrop-blur;
+  }
+
+  .nav-link {
+    @apply rounded-full px-3 py-1.5 text-sm font-bold text-purple-1 transition-colors;
+  }
+
+  .nav-link-active {
+    @apply bg-purple-6;
+  }
+
+  .badge {
+    @apply rounded-full px-3 py-1 text-xs font-bold;
+  }
+}
