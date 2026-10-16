@@ -23,12 +23,26 @@ export interface RegistroSignos {
   creadoEn: string;
 }
 
+// El servidor no se pudo alcanzar (sin conexión, caído…). Es distinto de una respuesta HTTP con
+// error: solo este caso justifica guardar el registro en la cola local para enviarlo después.
+export class ErrorDeRed extends Error {
+  constructor(ruta: string) {
+    super(`Sin conexión al llamar ${ruta}`);
+    this.name = "ErrorDeRed";
+  }
+}
+
 async function solicitar<T>(ruta: string, opciones?: RequestInit): Promise<T> {
-  const respuesta = await fetch(`${API_URL}${ruta}`, {
-    ...opciones,
-    headers: { "Content-Type": "application/json", ...opciones?.headers },
-    cache: "no-store",
-  });
+  let respuesta: Response;
+  try {
+    respuesta = await fetch(`${API_URL}${ruta}`, {
+      ...opciones,
+      headers: { "Content-Type": "application/json", ...opciones?.headers },
+      cache: "no-store",
+    });
+  } catch {
+    throw new ErrorDeRed(ruta);
+  }
   if (!respuesta.ok) {
     throw new Error(`Error ${respuesta.status} al llamar ${ruta}`);
   }

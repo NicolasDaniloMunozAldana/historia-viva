@@ -1,70 +1,84 @@
 @import "tailwindcss";
 
-/* Paleta y tokens tomados del design system de Alivia. */
+/*
+ * Paleta "Warm Minimalist": ink (texto/superficies oscuras), sage (acento de
+ * marca), cloud (fondo de app) y peach (acento cálido para estados de espera
+ * o alerta). `peach-strong` y `sage-strong` son mezclas derivadas de esos
+ * mismos colores — no colores nuevos — para texto legible sobre fondos claros,
+ * donde el peach o el sage puros no dan suficiente contraste.
+ */
 @theme {
-  --color-purple-1: #402f6c;
-  --color-purple-2: #6a4cb3;
-  --color-purple-3: #65558f;
-  --color-purple-4: #d2c7ed;
-  --color-purple-5: #e1dbf0;
-  --color-purple-6: #ece6f0;
-  --color-lilac-1: #f2edf5;
-  --color-lilac-2: #fdfaff;
-  --color-green-1: #68eeb4;
-  --color-green-2: #c3f4df;
-  --color-neutral-1: #f5f5f5;
-  --color-neutral-2: #e7ebee;
-  --color-neutral-3: #ffffff;
-  --color-black-1: #000000;
-  --color-black-2: #3a3a3c;
-  --color-black-3: #8e8e93;
-  --color-black-4: #aeaeb2;
-  --color-black-6: #d1d1d6;
-  --color-status-red: #bf4c48;
-  --color-status-green: #60b96a;
+  --color-ink: #4a4947;
+  --color-sage: #8fc1b5;
+  --color-cloud: #f4f4f3;
+  --color-peach: #ffb088;
+  --color-peach-strong: color-mix(in srgb, var(--color-peach) 55%, var(--color-ink) 45%);
+  --color-sage-strong: color-mix(in srgb, var(--color-sage) 35%, var(--color-ink) 65%);
+
   --radius-card: 20px;
   --radius-button: 40px;
-  --shadow-card: 0px 4px 10.5px 0px rgba(0, 0, 0, 0.14);
-  --shadow-navbar: 0px 4px 13.3px 0px rgba(0, 0, 0, 0.1);
-  --font-mulish: var(--font-mulish);
+  --shadow-card: 0px 4px 10.5px 0px rgba(74, 73, 71, 0.08);
+  --shadow-navbar: 0px 4px 13.3px 0px rgba(74, 73, 71, 0.1);
+
+  /*
+   * Servidos localmente vía @fontsource (npm), no next/font/google: ese
+   * paquete descarga los .woff2 desde fonts.gstatic.com en cada build, y ese
+   * dominio puede estar bloqueado por firewalls/redes corporativas. Con
+   * @fontsource los archivos quedan instalados en node_modules — cero
+   * dependencia de red al arrancar el proyecto.
+   */
+  --font-heading: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
 }
 
 body {
-  background: var(--color-neutral-1);
-  color: var(--color-black-2);
-  font-family: var(--font-mulish), system-ui, sans-serif;
+  background: var(--color-cloud);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-heading);
 }
 
 @layer components {
   .btn-primary {
-    @apply rounded-[40px] border border-purple-1 bg-green-1 px-6 py-3 font-bold text-purple-1 transition-transform hover:scale-105;
+    @apply rounded-[40px] bg-ink px-6 py-3 font-heading font-bold text-white transition-transform hover:scale-105;
   }
 
   .btn-secondary {
-    @apply rounded-[40px] border border-purple-1 bg-white px-6 py-3 font-bold text-purple-1 transition-transform hover:scale-105;
+    @apply rounded-[40px] border border-ink/20 bg-white px-6 py-3 font-heading font-bold text-ink transition-transform hover:scale-105;
   }
 
   .card {
-    @apply rounded-[20px] bg-white p-5 shadow-[0px_4px_10.5px_0px_rgba(0,0,0,0.14)];
+    @apply rounded-[20px] bg-white p-5 shadow-[0px_4px_10.5px_0px_rgba(74,73,71,0.08)];
   }
 
   .input-field {
-    @apply w-full rounded-2xl border border-black-4 bg-neutral-1 px-4 py-3 text-sm text-black-2 outline-none focus:border-purple-2 focus:ring-4 focus:ring-purple-5;
-  }
-
-  .nav-bar {
-    @apply sticky top-4 z-10 mx-auto flex w-[min(720px,calc(100%-2rem))] items-center justify-between gap-3 rounded-full bg-white/75 px-5 py-3 shadow-[0px_4px_13.3px_0px_rgba(0,0,0,0.1)] backdrop-blur;
-  }
-
-  .nav-link {
-    @apply rounded-full px-3 py-1.5 text-sm font-bold text-purple-1 transition-colors;
-  }
-
-  .nav-link-active {
-    @apply bg-purple-6;
+    @apply w-full rounded-2xl border border-ink/15 bg-white px-4 py-3 text-sm text-ink outline-none focus:border-sage focus:ring-4 focus:ring-sage/25;
   }
 
   .badge {
     @apply rounded-full px-3 py-1 text-xs font-bold;
+  }
+
+  /* Marca en el header: ícono + wordmark de dos tonos. */
+  .brand-bar {
+    @apply sticky top-0 z-10 flex items-center gap-2.5 bg-white/90 px-5 py-4 shadow-[0px_4px_13.3px_0px_rgba(74,73,71,0.1)] backdrop-blur;
+  }
+
+  /* Barra de navegación inferior fija. */
+  .tab-bar {
+    @apply fixed inset-x-0 bottom-0 z-10 flex items-center justify-around border-t border-ink/10 bg-white/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur;
+  }
+
+  .tab-item {
+    @apply flex flex-col items-center gap-1 rounded-2xl px-5 py-1.5 text-xs font-bold text-ink/80 transition-colors;
+  }
+
+  .tab-item-active {
+    @apply text-sage-strong;
   }
 }

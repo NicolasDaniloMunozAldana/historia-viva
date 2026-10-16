@@ -1,42 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { Workbox } from "workbox-window";
 
+// Registra el Service Worker generado por Workbox (Sesión 23) en silencio: el estado de instalación es
+// información de diagnóstico (consola / DevTools), no algo que el personal de salud necesite ver.
+// `workbox-window` es la pieza del lado de la página: simplifica registro y actualizaciones.
 export default function ServiceWorkerRegister() {
-  const [estado, setEstado] = useState<"comprobando" | "activo" | "error" | "no-soportado">(
-    "comprobando",
-  );
-
   useEffect(() => {
-    if (!("serviceWorker" in navigator)) {
-      setEstado("no-soportado");
-      return;
-    }
-    navigator.serviceWorker
-      .register("/sw.js")
-      .then((registro) => {
-        console.log("SW registrado:", registro.scope);
-        setEstado("activo");
-      })
-      .catch((error) => {
-        console.error("Error al registrar SW:", error);
-        setEstado("error");
-      });
+    if (!("serviceWorker" in navigator)) return;
+    const wb = new Workbox("/sw.js");
+    wb.addEventListener("activated", (evento) => {
+      console.log(evento.isUpdate ? "SW de Workbox actualizado" : "SW de Workbox activo");
+    });
+    wb.register()
+      .then((registro) => console.log("SW registrado:", registro?.scope))
+      .catch((error) => console.error("Error al registrar SW:", error));
   }, []);
 
-  const estilos: Record<typeof estado, string> = {
-    comprobando: "bg-purple-6 text-purple-3",
-    activo: "bg-green-2 text-[#047e49]",
-    error: "bg-[#f2dbda] text-status-red",
-    "no-soportado": "bg-[#f2dbda] text-status-red",
-  };
-
-  const textos: Record<typeof estado, string> = {
-    comprobando: "Service Worker: comprobando…",
-    activo: "Service Worker: activo",
-    error: "Service Worker: error al registrar",
-    "no-soportado": "Sin soporte de Service Workers",
-  };
-
-  return <span className={`badge ${estilos[estado]}`}>{textos[estado]}</span>;
+  return null;
 }

@@ -22,7 +22,7 @@ export default function NuevoPacientePage() {
       router.push("/pacientes");
       router.refresh();
     } catch {
-      setError("No se pudo guardar el paciente. Verifica que la API esté corriendo.");
+      setError("No se pudo guardar el paciente. Intenta de nuevo.");
     } finally {
       setEnviando(false);
     }
@@ -30,10 +30,10 @@ export default function NuevoPacientePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-extrabold text-purple-1">Nuevo paciente</h1>
+      <h1 className="font-heading text-2xl font-extrabold text-ink">Nuevo paciente</h1>
 
       <form onSubmit={manejarEnvio} className="card flex flex-col gap-4">
-        <label className="flex flex-col gap-1 text-sm font-semibold text-black-2">
+        <label className="flex flex-col gap-1 text-sm font-semibold text-ink">
           Nombre completo
           <input
             className="input-field"
@@ -43,7 +43,7 @@ export default function NuevoPacientePage() {
           />
         </label>
 
-        <label className="flex flex-col gap-1 text-sm font-semibold text-black-2">
+        <label className="flex flex-col gap-1 text-sm font-semibold text-ink">
           Edad
           <input
             className="input-field"
@@ -55,7 +55,7 @@ export default function NuevoPacientePage() {
           />
         </label>
 
-        <label className="flex flex-col gap-1 text-sm font-semibold text-black-2">
+        <label className="flex flex-col gap-1 text-sm font-semibold text-ink">
           Dirección / vereda
           <input
             className="input-field"
@@ -65,7 +65,7 @@ export default function NuevoPacientePage() {
           />
         </label>
 
-        <label className="flex flex-col gap-1 text-sm font-semibold text-black-2">
+        <label className="flex flex-col gap-1 text-sm font-semibold text-ink">
           Notas clínicas (opcional)
           <textarea
             className="input-field"
@@ -75,7 +75,7 @@ export default function NuevoPacientePage() {
           />
         </label>
 
-        {error && <p className="text-sm text-status-red">{error}</p>}
+        {error && <p className="text-sm text-peach-strong">{error}</p>}
 
         <button type="submit" className="btn-primary self-start" disabled={enviando}>
           {enviando ? "Guardando…" : "Guardar paciente"}
