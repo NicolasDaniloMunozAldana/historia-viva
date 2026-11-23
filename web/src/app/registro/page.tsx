@@ -23,6 +23,7 @@ function FormularioRegistro() {
   const [horaAdministracion, setHoraAdministracion] = useState("");
   const [evidencia, setEvidencia] = useState<Evidencia>({ foto: null, ubicacion: null });
   const [registradoPor, setRegistradoPor] = useState("");
+  const [recordarHoras, setRecordarHoras] = useState("0");
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [exito, setExito] = useState(false);
@@ -48,6 +49,8 @@ function FormularioRegistro() {
       horaAdministracion,
       tieneEvidenciaFoto: evidencia.foto !== null,
       registradoPor,
+      // Push: el servidor avisará a los dispositivos suscritos cuando toque la próxima dosis.
+      recordarEnMinutos: Number(recordarHoras) > 0 ? Math.round(Number(recordarHoras) * 60) : undefined,
     };
     const limpiarCampos = () => {
       setPresionArterial("");
@@ -56,6 +59,7 @@ function FormularioRegistro() {
       setDosisAdministrada("");
       setHoraAdministracion("");
       setEvidencia({ foto: null, ubicacion: null });
+      setRecordarHoras("0");
     };
     try {
       const registro = await crearRegistro(pacienteId, datos);
@@ -182,6 +186,19 @@ function FormularioRegistro() {
             onChange={(e) => setRegistradoPor(e.target.value)}
             required
           />
+        </label>
+
+        <label className="flex flex-col gap-1 text-sm font-semibold text-ink">
+          Recordarme la próxima dosis (notificación push)
+          <select className="input-field" value={recordarHoras} onChange={(e) => setRecordarHoras(e.target.value)}>
+            <option value="0">No recordar</option>
+            <option value="0.0167">En 1 minuto (para probar)</option>
+            <option value="4">En 4 horas</option>
+            <option value="6">En 6 horas</option>
+            <option value="8">En 8 horas</option>
+            <option value="12">En 12 horas</option>
+            <option value="24">En 24 horas</option>
+          </select>
         </label>
 
         <CapturaEvidencia valor={evidencia} onCambio={setEvidencia} />

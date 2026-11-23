@@ -1,5 +1,6 @@
 import Link from "next/link";
 import EstadoConexion from "@/components/EstadoConexion";
+import AvisosPush from "@/components/AvisosPush";
 import InstalarApp from "@/components/InstalarApp";
 import EvidenciaRegistro from "@/components/EvidenciaRegistro";
 import PendientesCard from "@/components/PendientesCard";
@@ -42,6 +43,8 @@ export default async function InicioPage() {
       </section>
 
       <InstalarApp />
+
+      <AvisosPush />
 
       <PendientesCard />
 

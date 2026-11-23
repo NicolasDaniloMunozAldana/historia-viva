@@ -1,12 +1,13 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException, Optional } from '@nestjs/common';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
+import { PushService } from '../push/push.service.js';
 import type { EvidenciaServidor, Paciente, RegistroSignos } from './paciente.model.js';
 
 type DatosRegistro = Pick<
   RegistroSignos,
   'presionArterial' | 'frecuenciaCardiaca' | 'temperatura' | 'dosisAdministrada' | 'horaAdministracion' | 'tieneEvidenciaFoto' | 'registradoPor'
-> & { idCliente?: string };
+> & { idCliente?: string; recordarEnMinutos?: number };
 
 interface Estado {
   pacientes: Paciente[];
@@ -28,7 +29,7 @@ export class PacientesService {
   private registros: RegistroSignos[] = [];
   private evidencias: EvidenciaServidor[] = [];
 
-  constructor() {
+  constructor(@Optional() private readonly push?: PushService) {
     if (!this.cargar()) {
       this.pacientes = [
         {
@@ -124,7 +125,23 @@ export class PacientesService {
     };
     this.registros.push(registro);
     this.guardar();
+    this.avisarPush(registro, datos.recordarEnMinutos);
     return registro;
+  }
+
+  /** Push: avisa a los dispositivos suscritos y, si se pidió, programa el recordatorio de la próxima dosis. */
+  private avisarPush(registro: RegistroSignos, recordarEnMinutos?: number): void {
+    if (!this.push) return;
+    const paciente = this.pacientes.find((p) => p.id === registro.pacienteId)?.nombre ?? 'Paciente';
+    void this.push
+      .notificar({
+        titulo: 'Nuevo registro',
+        cuerpo: `${registro.registradoPor} registró a ${paciente}: ${registro.presionArterial}, ${registro.frecuenciaCardiaca} lpm, ${registro.dosisAdministrada}`,
+        url: '/',
+        tag: `registro-${registro.id}`,
+      })
+      .catch(() => {});
+    if (recordarEnMinutos) this.push.programarRecordatorio(paciente, registro.dosisAdministrada, Number(recordarEnMinutos));
   }
 
   guardarEvidencia(registroId: string, datos: { foto?: string | null; ubicacion?: EvidenciaServidor['ubicacion'] }): EvidenciaServidor {

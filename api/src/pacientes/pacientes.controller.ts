@@ -33,7 +33,7 @@ export class PacientesController {
     datos: Pick<
       RegistroSignos,
       'presionArterial' | 'frecuenciaCardiaca' | 'temperatura' | 'dosisAdministrada' | 'horaAdministracion' | 'tieneEvidenciaFoto' | 'registradoPor'
-    > & { idCliente?: string },
+    > & { idCliente?: string; recordarEnMinutos?: number },
   ): RegistroSignos {
     return this.pacientesService.crearRegistro(id, datos);
   }

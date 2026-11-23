@@ -17,9 +17,26 @@
 | **Sesión temporal**: las notas se bloquean solas a los 5 min sin actividad o al salir de la app | ✅ nuevo | `web/src/lib/notasPrivadas.ts` |
 | Sensores (sacudida / inclinación) y estado de conexión | ✅ | `web/src/lib/sensores.ts`, `EstadoConexion.tsx` |
 | El servidor conserva los datos al reiniciarse (archivo JSON) | ✅ nuevo | `api/data/historiaviva.json` |
-| Notificaciones push desde el servidor y panel de seguimiento | ⏭ trabajo futuro (se dijo en la sustentación) | — |
+| **Notificaciones push desde el servidor** (Web Push + VAPID): aviso de nuevos registros y recordatorio programado de la próxima dosis, con la app cerrada | ✅ nuevo | `api/src/push/`, `web/src/lib/push.ts`, `web/public/sw-sync.js` |
+| Panel de seguimiento para el centro de salud | ⏭ trabajo futuro | — |
 
-Limitación asumida: una app web **no puede programar alertas con la app cerrada y sin conexión**; por eso las notificaciones push quedan como paso futuro en lugar de prometer algo que la plataforma no garantiza.
+Limitación asumida: una app web **no puede programar alertas locales con la app cerrada**; por eso las alertas las envía el **servidor** por push. Un dispositivo sin conexión las recibe cuando vuelve la red (el servicio push las retiene hasta 1 hora).
+
+## Notificaciones push
+- En **Inicio → Notificaciones** se pulsa «Activar notificaciones»: el navegador crea una suscripción con la clave pública VAPID del servidor y se la entrega (`POST /api/push/suscripciones`).
+- Cada vez que se crea un registro, el servidor avisa a los dispositivos suscritos («Mileth registró a Rosa…»).
+- En el formulario de registro se puede pedir **«Recordarme la próxima dosis»** (la opción «En 1 minuto» sirve para probar): el servidor guarda el recordatorio y lo envía cuando vence, aunque la app esté cerrada.
+- El Service Worker (`sw-sync.js`) recibe el mensaje en el evento `push` y muestra la notificación; al tocarla abre la app.
+- Si un servicio push responde 404/410 (app desinstalada), la suscripción se elimina sola. Al abrir la app el dispositivo se vuelve a registrar si el servidor perdió sus suscripciones.
+- En iPhone solo funciona con la app **instalada** en la pantalla de inicio (iOS 16.4+).
+
+### Variables de entorno de la API (Render)
+| Variable | Para qué |
+|---|---|
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` | Claves VAPID (generarlas una vez con `npx web-push generate-vapid-keys`). Si no se definen, se generan al arrancar y se pierden en un reinicio (el dispositivo se vuelve a suscribir solo). |
+| `VAPID_SUBJECT` | Contacto del remitente, p. ej. `mailto:correo@dominio.com`. |
+| `HV_DATA_FILE`, `HV_PUSH_FILE` | Archivos JSON de datos y de suscripciones (por defecto `data/`). Vacío = sin persistencia. |
+Web: `NEXT_PUBLIC_API_URL` = URL pública de la API terminada en `/api`.
 
 ## Arquitectura
 ```
@@ -36,7 +53,7 @@ cd web && npm install && npm run build && npm start             # http://localho
 ```
 Abrir http://localhost:3000, instalar la app, y probar: DevTools → Network → *Offline*, registrar signos vitales (queda en «Pendientes»), volver a *Online*: se envían solos.
 
-Pruebas del servidor: `cd api && npm test`.
+Pruebas del servidor (12): `cd api && npm test`.
 
 ## Probar el flujo offline → sincronización
 1. Abrir `/registro`, elegir un paciente y llenar el formulario.

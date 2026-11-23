@@ -21,6 +21,7 @@ export interface RegistroSignos {
   sincronizado: boolean;
   registradoPor: string;
   idCliente?: string;
+  recordarEnMinutos?: number;
   creadoEn: string;
 }
 
@@ -73,7 +74,7 @@ export function crearRegistro(
   pacienteId: string,
   datos: Pick<
     RegistroSignos,
-    "presionArterial" | "frecuenciaCardiaca" | "temperatura" | "dosisAdministrada" | "horaAdministracion" | "tieneEvidenciaFoto" | "registradoPor" | "idCliente"
+    "presionArterial" | "frecuenciaCardiaca" | "temperatura" | "dosisAdministrada" | "horaAdministracion" | "tieneEvidenciaFoto" | "registradoPor" | "idCliente" | "recordarEnMinutos"
   >,
 ) {
   return solicitar<RegistroSignos>(`/pacientes/${pacienteId}/registros`, {

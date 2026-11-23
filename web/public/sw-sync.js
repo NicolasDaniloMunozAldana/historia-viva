@@ -53,6 +53,7 @@ async function vaciarCola() {
         tieneEvidenciaFoto: p.tieneEvidenciaFoto,
         registradoPor: p.registradoPor,
         idCliente: p.idCliente, // el servidor no duplica un reenvío con el mismo id
+        recordarEnMinutos: p.recordarEnMinutos,
       });
       if (!res.ok) {
         // El servidor respondió con error: el registro se conserva, con el motivo, para revisarlo en la app.
@@ -99,6 +100,44 @@ self.addEventListener("sync", (evento) => {
           tag: "hv-sincronizado",
         });
       }
+    })(),
+  );
+});
+
+// ── Notificaciones push ──────────────────────────────────────────────────────────────────────────────
+// El servidor envía un mensaje cifrado; el navegador despierta este Service Worker aunque la app esté cerrada
+// y aquí se muestra la notificación. userVisibleOnly:true obliga a mostrar SIEMPRE una (no hay push «mudo»).
+self.addEventListener("push", (evento) => {
+  let datos = {};
+  try {
+    datos = evento.data ? evento.data.json() : {};
+  } catch {
+    datos = { cuerpo: evento.data ? evento.data.text() : "" };
+  }
+  evento.waitUntil(
+    self.registration.showNotification(datos.titulo || "HistoriaViva", {
+      body: datos.cuerpo || "",
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      tag: datos.tag || "historiaviva", // el mismo tag reemplaza a la notificación anterior
+      data: { url: datos.url || "/" },
+    }),
+  );
+});
+
+// Tocar la notificación enfoca la app abierta (y la lleva a la ruta) o la abre.
+self.addEventListener("notificationclick", (evento) => {
+  evento.notification.close();
+  const destino = new URL((evento.notification.data && evento.notification.data.url) || "/", self.location.origin).href;
+  evento.waitUntil(
+    (async () => {
+      const ventanas = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      const abierta = ventanas.find((v) => new URL(v.url).origin === self.location.origin);
+      if (abierta) {
+        await abierta.navigate(destino).catch(() => null);
+        return abierta.focus();
+      }
+      return self.clients.openWindow(destino);
     })(),
   );
 });

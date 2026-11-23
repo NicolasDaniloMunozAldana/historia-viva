@@ -42,6 +42,8 @@ export interface RegistroPendiente {
   registradoPor: string;
   /** Id único generado en este dispositivo: el servidor lo usa para no duplicar un reenvío. */
   idCliente: string;
+  /** Pedir al servidor un aviso push de «próxima dosis» dentro de N minutos (opcional). */
+  recordarEnMinutos?: number;
   foto?: Blob | null;
   ubicacion?: Ubicacion | null;
   creadoEn: number;

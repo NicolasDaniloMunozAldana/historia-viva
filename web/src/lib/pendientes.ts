@@ -39,6 +39,7 @@ export function enviarPendientes(): Promise<number> {
           registradoPor: pendiente.registradoPor,
           // Mismo id en cada reintento: si el servidor ya lo recibió, responde con el registro existente (no duplica).
           idCliente: pendiente.idCliente,
+          recordarEnMinutos: pendiente.recordarEnMinutos,
         });
         // La foto y la ubicación se suben al servidor (PUT idempotente) y además quedan en el dispositivo con el id real.
         if (pendiente.foto || pendiente.ubicacion) {
