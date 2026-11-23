@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { obtenerEvidencia, type Ubicacion } from "@/lib/db";
 import { formatearUbicacion } from "@/lib/dispositivo";
+import { obtenerEvidenciaServidor } from "@/lib/api";
 
 // Muestra la foto y la ubicación guardadas en este dispositivo para un registro ya enviado.
 // No dibuja nada si ese registro no tiene evidencias aquí.
@@ -14,13 +15,21 @@ export default function EvidenciaRegistro({ registroId }: { registroId: string }
     let url: string | null = null;
     let activo = true;
     obtenerEvidencia(registroId)
-      .then((evidencia) => {
-        if (!activo || !evidencia) return;
-        if (evidencia.foto) {
-          url = URL.createObjectURL(evidencia.foto);
-          setMiniatura(url);
+      .then(async (evidencia) => {
+        if (!activo) return;
+        if (evidencia) {
+          if (evidencia.foto) {
+            url = URL.createObjectURL(evidencia.foto);
+            setMiniatura(url);
+          }
+          setUbicacion(evidencia.ubicacion);
+          return;
         }
-        setUbicacion(evidencia.ubicacion);
+        // No está en este dispositivo (la tomó otro cuidador): se pide la que se subió al servidor al sincronizar.
+        const remota = await obtenerEvidenciaServidor(registroId);
+        if (!activo) return;
+        if (remota.foto) setMiniatura(remota.foto);
+        setUbicacion(remota.ubicacion);
       })
       .catch(() => {});
     return () => {

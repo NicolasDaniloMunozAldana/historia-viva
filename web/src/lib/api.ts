@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
+export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
 
 export interface Paciente {
   id: string;
@@ -20,6 +20,7 @@ export interface RegistroSignos {
   tieneEvidenciaFoto: boolean;
   sincronizado: boolean;
   registradoPor: string;
+  idCliente?: string;
   creadoEn: string;
 }
 
@@ -72,11 +73,39 @@ export function crearRegistro(
   pacienteId: string,
   datos: Pick<
     RegistroSignos,
-    "presionArterial" | "frecuenciaCardiaca" | "temperatura" | "dosisAdministrada" | "horaAdministracion" | "tieneEvidenciaFoto" | "registradoPor"
+    "presionArterial" | "frecuenciaCardiaca" | "temperatura" | "dosisAdministrada" | "horaAdministracion" | "tieneEvidenciaFoto" | "registradoPor" | "idCliente"
   >,
 ) {
   return solicitar<RegistroSignos>(`/pacientes/${pacienteId}/registros`, {
     method: "POST",
     body: JSON.stringify(datos),
+  });
+}
+
+export interface EvidenciaServidor {
+  registroId: string;
+  foto: string | null;
+  ubicacion: { lat: number; lon: number; precision: number; momento: string } | null;
+}
+
+/** Sube la foto (como data URL) y la ubicación de un registro ya creado. Reenviar reemplaza, no duplica. */
+export function subirEvidencia(registroId: string, evidencia: { foto: string | null; ubicacion: EvidenciaServidor["ubicacion"] }) {
+  return solicitar<EvidenciaServidor>(`/registros/${registroId}/evidencia`, {
+    method: "PUT",
+    body: JSON.stringify(evidencia),
+  });
+}
+
+export function obtenerEvidenciaServidor(registroId: string) {
+  return solicitar<EvidenciaServidor>(`/registros/${registroId}/evidencia`);
+}
+
+/** Convierte una foto (Blob) en data URL para viajar en el JSON. */
+export function blobADataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const lector = new FileReader();
+    lector.onload = () => resolve(lector.result as string);
+    lector.onerror = () => reject(lector.error);
+    lector.readAsDataURL(blob);
   });
 }

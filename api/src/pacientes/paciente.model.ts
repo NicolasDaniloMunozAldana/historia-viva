@@ -18,5 +18,15 @@ export interface RegistroSignos {
   tieneEvidenciaFoto: boolean;
   sincronizado: boolean;
   registradoPor: string;
+  /** Id generado en el dispositivo: permite reenviar sin duplicar (idempotencia). */
+  idCliente?: string;
   creadoEn: string;
+}
+
+export interface EvidenciaServidor {
+  registroId: string;
+  /** Foto como data URL (image/jpeg;base64,...). */
+  foto: string | null;
+  ubicacion: { lat: number; lon: number; precision: number; momento: string } | null;
+  recibidaEn: string;
 }

@@ -1,6 +1,6 @@
 // Cola offline: los registros que no se pudieron enviar por falta de conexión quedan en IndexedDB y se
 // envían, del más antiguo al más reciente, cuando vuelve la señal.
-import { crearRegistro, ErrorDeRed } from "./api";
+import { blobADataUrl, crearRegistro, ErrorDeRed, subirEvidencia } from "./api";
 import { eliminarPendiente, guardarEvidencia, obtenerPendientes, registrarFalloDePendiente } from "./db";
 
 export const EVENTO_PENDIENTES_CAMBIARON = "hv:pendientes-cambiaron";
@@ -37,9 +37,20 @@ export function enviarPendientes(): Promise<number> {
           horaAdministracion: pendiente.horaAdministracion,
           tieneEvidenciaFoto: pendiente.tieneEvidenciaFoto,
           registradoPor: pendiente.registradoPor,
+          // Mismo id en cada reintento: si el servidor ya lo recibió, responde con el registro existente (no duplica).
+          idCliente: pendiente.idCliente,
         });
-        // La foto y la ubicación no viajan al servidor: pasan a las evidencias del dispositivo, con el id real.
+        // La foto y la ubicación se suben al servidor (PUT idempotente) y además quedan en el dispositivo con el id real.
         if (pendiente.foto || pendiente.ubicacion) {
+          try {
+            await subirEvidencia(registro.id, {
+              foto: pendiente.foto ? await blobADataUrl(pendiente.foto) : null,
+              ubicacion: pendiente.ubicacion ?? null,
+            });
+          } catch (error) {
+            if (error instanceof ErrorDeRed) break; // se cayó la señal: el registro ya está, se reintenta todo (sin duplicar)
+            // Un rechazo del servidor (foto demasiado grande…) no debe bloquear la cola: queda la copia local.
+          }
           await guardarEvidencia({
             registroId: registro.id,
             foto: pendiente.foto ?? null,

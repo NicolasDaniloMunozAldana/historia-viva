@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { bloquearNotas, desbloquearNotas, useNotasDesbloqueadas } from "@/lib/notasPrivadas";
+import { bloquearNotas, desbloquearNotas, MINUTOS_SESION, obtenerMotivoBloqueo, useNotasDesbloqueadas } from "@/lib/notasPrivadas";
 
 // Desbloqueo de las notas privadas: la contraseña solo sirve para derivar la clave de cifrado,
 // nunca se guarda. Al recargar o cerrar la app las notas vuelven a quedar bloqueadas.
 export default function BarraNotasPrivadas() {
   const desbloqueada = useNotasDesbloqueadas();
+  const motivoBloqueo = !desbloqueada ? obtenerMotivoBloqueo() : null;
   const [contrasena, setContrasena] = useState("");
   const [mensaje, setMensaje] = useState<{ texto: string; error: boolean } | null>(null);
   const [trabajando, setTrabajando] = useState(false);
@@ -38,7 +39,7 @@ export default function BarraNotasPrivadas() {
         <div>
           <h2 className="font-heading text-base font-bold text-ink">Notas privadas</h2>
           <p className="text-xs text-ink/80">
-            Se guardan cifradas en este dispositivo; solo se leen con tu contraseña.
+            Se guardan cifradas en este dispositivo; solo se leen con tu contraseña. La sesión se cierra sola tras {MINUTOS_SESION} min sin actividad.
           </p>
         </div>
         <span className={`badge ${desbloqueada ? "bg-sage/25 text-ink" : "bg-ink/10 text-ink/80"}`}>
@@ -74,7 +75,8 @@ export default function BarraNotasPrivadas() {
         </form>
       )}
 
-      {mensaje && <p className={`text-sm ${mensaje.error ? "text-peach-strong" : "text-sage-strong"}`}>{mensaje.texto}</p>}
+      {motivoBloqueo && !mensaje && <p className="text-sm text-peach-strong">{motivoBloqueo}</p>}
+      {mensaje && !motivoBloqueo && <p className={`text-sm ${mensaje.error ? "text-peach-strong" : "text-sage-strong"}`}>{mensaje.texto}</p>}
     </section>
   );
 }

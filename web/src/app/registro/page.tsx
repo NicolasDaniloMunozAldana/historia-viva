@@ -7,6 +7,7 @@ import { crearRegistro, ErrorDeRed, listarPacientes, type Paciente } from "@/lib
 import CapturaEvidencia, { type Evidencia } from "@/components/CapturaEvidencia";
 import { guardarEvidencia, guardarPendiente } from "@/lib/db";
 import { avisarCambioEnPendientes } from "@/lib/pendientes";
+import { pedirSincronizacionEnSegundoPlano } from "@/lib/sync";
 
 function FormularioRegistro() {
   const router = useRouter();
@@ -77,6 +78,7 @@ function FormularioRegistro() {
             ubicacion: evidencia.ubicacion,
           });
           avisarCambioEnPendientes();
+          void pedirSincronizacionEnSegundoPlano(); // Background Sync: se envía solo al volver la señal, incluso con la app cerrada
           setAviso("Sin conexión. Guardamos el registro en este dispositivo y lo enviaremos cuando vuelva la señal.");
           limpiarCampos();
         } catch {

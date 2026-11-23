@@ -40,6 +40,8 @@ export interface RegistroPendiente {
   horaAdministracion: string;
   tieneEvidenciaFoto: boolean;
   registradoPor: string;
+  /** Id único generado en este dispositivo: el servidor lo usa para no duplicar un reenvío. */
+  idCliente: string;
   foto?: Blob | null;
   ubicacion?: Ubicacion | null;
   creadoEn: number;
@@ -109,8 +111,8 @@ async function enTransaccion<T>(
 
 // --- Cola de registros pendientes ---
 
-export function guardarPendiente(registro: Omit<RegistroPendiente, "id" | "intentos" | "ultimoError" | "creadoEn">) {
-  const completo: RegistroPendiente = { ...registro, creadoEn: Date.now(), intentos: 0, ultimoError: null };
+export function guardarPendiente(registro: Omit<RegistroPendiente, "id" | "intentos" | "ultimoError" | "creadoEn" | "idCliente">) {
+  const completo: RegistroPendiente = { ...registro, idCliente: crypto.randomUUID(), creadoEn: Date.now(), intentos: 0, ultimoError: null };
   return enTransaccion<IDBValidKey>("pendientes", "readwrite", (tx) => tx.objectStore("pendientes").add(completo));
 }
 
@@ -186,6 +188,6 @@ export async function obtenerConfig<T>(clave: string): Promise<T | undefined> {
   return registro?.valor;
 }
 
-export function guardarConfig(clave: string, valor: Uint8Array<ArrayBuffer> | TextoCifrado) {
+export function guardarConfig(clave: string, valor: Uint8Array<ArrayBuffer> | TextoCifrado | string) {
   return enTransaccion<IDBValidKey>("config", "readwrite", (tx) => tx.objectStore("config").put({ clave, valor }));
 }

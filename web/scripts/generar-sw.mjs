@@ -22,10 +22,13 @@ generateSW({
     { url: "/registro", revision: buildId },
     { url: "/pacientes/nuevo", revision: buildId },
     { url: "/manifest.webmanifest", revision: buildId },
+    { url: "/sw-sync.js", revision: buildId },
     { url: "/icons/icon-192.png", revision: buildId },
     { url: "/icons/icon-512.png", revision: buildId },
     { url: "/icons/icon-512-maskable.png", revision: buildId },
   ],
+  // Background Sync: el evento «sync» lo atiende public/sw-sync.js (Workbox no lo genera).
+  importScripts: ["/sw-sync.js"],
   cleanupOutdatedCaches: true,
   clientsClaim: true,
   skipWaiting: true,
